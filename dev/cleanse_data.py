@@ -31,7 +31,7 @@ def cleanse_student_table(df):
 
     df['contact_info'] = df["contact_info"].apply(lambda x: ast.literal_eval(x))
     explode_contact = pd.json_normalize(df['contact_info'])
-    df = pd.concat([df.drop('contact_info', axis=1), explode_contact], axis=1)
+    df = pd.concat([df.drop('contact_info', axis=1).reset_index(drop=True), explode_contact], axis=1)
 
     split_mailing = df['mailing_address'].str.split(',', expand=True)
     split_mailing.columns = ['street', 'city', 'state', 'zip_code']
@@ -135,11 +135,8 @@ def main():
     #Calculate Version for changelog
     with open('./dev/changelog.md') as f:
         lines = f.readlines()
-    if len(lines) == 0:
-        next_ver = 0
-    else:
-        #X.Y.Z
-        next_ver = int(lines[0].split('.')[2][0])+1
+    #X.Y.Z
+    next_ver = int(lines[0].split('.')[2][0])+1
     
     #Connect to dev database and read in tables
     con = sqlite3.connect('./dev/cademycode.db')
@@ -156,7 +153,7 @@ def main():
         con.close()
 
         #filter for students that aren't in prod db
-        new_students = students[~np.isin(students.uuid.unique(), clean_db.uuid.unique())]
+        new_students = students[~np.isin(students['uuid'].unique(), clean_db['uuid'].unique())]
     except:
         new_students = students
         clean_db = []
@@ -165,7 +162,7 @@ def main():
 
     try: 
         #Filter for incomplete rows that don't exist in missing data table
-        new_missing_data = missing_data[~np.isin(missing_data.uuid.unique(), missing_db.uuid.unique())]
+        new_missing_data = missing_data[~np.isin(missing_data['uuid'].unique(), missing_db['uuid'].unique())]
     except:
         new_missing_data = missing_data
 
@@ -219,7 +216,7 @@ def main():
         new_lines = [
             '## 0.0.' + str(next_ver) + '\n' +
             '### Added\n' +
-            '- ' + str(len(df_clean)) + ' more data to database of raw data\n' +
+            '- ' + str(len(df_clean)) + ' more data to database of clean data\n' +
             '- ' + str(len(new_missing_data)) + ' new missing data to missing_data table\n' +
             '\n'
         ]
