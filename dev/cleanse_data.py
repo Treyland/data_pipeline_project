@@ -26,7 +26,7 @@ def cleanse_student_table(df):
     df['time_spent_hrs'] = df['time_spent_hrs'].astype(float)
 
     now = pd.to_datetime('today')
-    df['age'] = (now - pd.to_datetime(df['dob'])).astype('<m8[Y]')
+    df['age'] = ((now - pd.to_datetime(df['dob']))/np.timedelta64(1, 'Y')).astype('float').round(0)
     df['age_group'] = np.int64((df['age']/10))*10
 
     df['contact_info'] = df["contact_info"].apply(lambda x: ast.literal_eval(x))
@@ -60,7 +60,7 @@ def cleanse_courses_data(df):
     return(df)
 
 def cleanse_student_jobs(df):
-    return(df.drop_duplicates(inplace=True))
+    return(df.drop_duplicates())
 
 
 #Unit Tests

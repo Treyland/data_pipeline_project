@@ -24,7 +24,7 @@ then
     prod_version=${splitversion_prod[1]}
 
     # if version numbers are different, ask and move dev files to prod
-    if [ $prod_version != $dev_version ]
+    if [ "$prod_version" != "$dev_version" ]
     then 
         echo 'There are new changes. Would you like to move dev files to prod? [1/0]'
         read scriptcontinue
